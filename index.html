@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Isian Data Dukung CAPA - BPOM di Surakarta</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons CDN -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        // Configure tailwind theme after tailwind script loads
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        },
+                        colors: {
+                            bpom: {
+                                50: '#f0f7ff',
+                                100: '#e0effe',
+                                500: '#0066b2', // Core BPOM Blue
+                                600: '#005291',
+                                700: '#003d70',
+                                900: '#001e3d',
+                                gold: '#d4af37',
+                                emerald: '#059669'
+                            }
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #001e3d 0%, #003d70 40%, #005291 100%);
+            min-height: 100vh;
+        }
+        /* Custom scrollbar */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+        }
+        .bpom-gradient-btn {
+            background: linear-gradient(135deg, #0066b2 0%, #003d70 100%);
+        }
+        .bpom-gradient-btn:hover {
+            background: linear-gradient(135deg, #005291 0%, #00284d 100%);
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-700 antialiased py-6 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-3xl mx-auto">
+        <!-- Header Card with BPOM Logo & Branding -->
+        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/20 mb-6 border border-white/40">
+            <div class="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-6 text-center sm:text-left">
+                <!-- Logo & Title Section -->
+                <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                    <!-- BPOM Logo Image Container -->
+                    <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-white p-2 shadow-md border border-slate-100 flex items-center justify-center shrink-0">
+                        <img src="https://lh3.googleusercontent.com/d/1rW-AVfUg8WQ6263JE4gd4AKm3nuEKDKq" 
+                             alt="Logo BPOM" 
+                             class="w-full h-full object-contain"
+                             onerror="this.onerror=null; this.src='https://placehold.co/200x200/ffffff/0066b2?text=BPOM';">
+                    </div>
+                    
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-bpom-50 text-bpom-700 border border-bpom-100 mb-1.5">
+                            <i class="ph-bold ph-shield-check text-bpom-500"></i> BADAN PENGAWAS OBAT DAN MAKANAN
+                        </div>
+                        <h1 class="text-xl sm:text-3xl font-extrabold text-bpom-900 tracking-tight whitespace-nowrap">BPOM DI SURAKARTA</h1>
+                    </div>
+                </div>
+
+                <!-- Live Clock Badge -->
+                <div class="w-full sm:w-auto bg-slate-50 border border-slate-200/90 rounded-2xl p-3 flex items-center justify-center sm:justify-start gap-3 shadow-inner">
+                    <div class="w-10 h-10 rounded-xl bg-bpom-500 text-white flex items-center justify-center text-xl shrink-0 shadow-sm">
+                        <i class="ph-bold ph-clock"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Waktu Pencatatan</div>
+                        <div id="live-timestamp-display" class="text-xs font-bold text-bpom-900 font-mono">--:--:--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form Container -->
+        <form id="inspectionForm" onsubmit="handleFormSubmit(event)" class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/20 border border-white/50 space-y-7">
+            
+            <!-- Hidden Input for Timestamp -->
+            <input type="hidden" id="timestamp" name="timestamp">
+
+            <!-- Single Subheader -->
+            <div class="pb-4 border-b border-slate-200/80">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-bpom-50 text-bpom-700 font-bold text-xs uppercase tracking-wider mb-2 border border-bpom-100 shadow-sm">
+                    <i class="ph-bold ph-file-text text-bpom-500 text-base"></i> Pengisian Dokumen Resmi
+                </div>
+                <h2 class="text-base sm:text-lg font-extrabold text-bpom-900 tracking-tight">Formulir pengiriman CAPA / Corrective Action and Preventive Action</h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">Lengkapi seluruh informasi data sarana dan dokumen pendukung dengan benar.</p>
+            </div>
+
+            <!-- Section 1: Informasi Petugas & Perusahaan -->
+            <div class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Nama Lengkap -->
+                    <div>
+                        <label for="nama" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                            Nama Pemilik/Pj. <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative rounded-2xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-lg">
+                                <i class="ph-bold ph-user"></i>
+                            </div>
+                            <input type="text" id="nama" name="nama" required
+                                placeholder="isikan nama lengkap"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200">
+                        </div>
+                    </div>
+
+                    <!-- Nama Sarana/Perusahaan -->
+                    <div>
+                        <label for="namaPerusahaan" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                            Nama Sarana / Perusahaan <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative rounded-2xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-lg">
+                                <i class="ph-bold ph-buildings"></i>
+                            </div>
+                            <input type="text" id="namaPerusahaan" name="namaPerusahaan" required
+                                placeholder="isikan nama sarana / perusahaan"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alamat Sarana/Perusahaan -->
+                <div>
+                    <label for="alamatPerusahaan" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Alamat Lengkap Sarana / Perusahaan <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative rounded-2xl shadow-sm">
+                        <div class="absolute top-3 left-0 pl-3.5 pointer-events-none text-slate-400 text-lg">
+                            <i class="ph-bold ph-map-pin"></i>
+                        </div>
+                        <textarea id="alamatPerusahaan" name="alamatPerusahaan" rows="3" required
+                            placeholder="Tuliskan jalan, nomor, kelurahan, kecamatan, kota/kabupaten..."
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Detail Kontak & Tanggal -->
+            <div class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Tanggal Pemeriksaan -->
+                    <div>
+                        <label for="tanggalPemeriksaan" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                            Tanggal Pemeriksaan <span class="text-xs font-normal text-slate-500 lowercase">(lihat pesan kiriman WhatsApp)</span> <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative rounded-2xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-lg">
+                                <i class="ph-bold ph-calendar-blank"></i>
+                            </div>
+                            <input type="date" id="tanggalPemeriksaan" name="tanggalPemeriksaan" required
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200">
+                        </div>
+                    </div>
+
+                    <!-- No Telp/HP -->
+                    <div>
+                        <label for="noTelp" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                            No. HP / Telepon <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative rounded-2xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-lg">
+                                <i class="ph-bold ph-phone"></i>
+                            </div>
+                            <input type="tel" id="noTelp" name="noTelp" required pattern="[0-9\+\-\s]{8,16}"
+                                placeholder="081234567890"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200">
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                            Alamat Email <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative rounded-2xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-lg">
+                                <i class="ph-bold ph-envelope-simple"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required
+                                placeholder="nama@email.com"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Keterangan & Lampiran -->
+            <div class="space-y-5">
+                <!-- Keterangan (Opsional) - Kolom I -->
+                <div>
+                    <label for="keterangan" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Keterangan tambahan <span class="text-xs font-normal text-slate-500 lowercase">(Opsional)</span>
+                    </label>
+                    <div class="relative rounded-2xl shadow-sm">
+                        <div class="absolute top-3 left-0 pl-3.5 pointer-events-none text-slate-400 text-lg">
+                            <i class="ph-bold ph-note"></i>
+                        </div>
+                        <textarea id="keterangan" name="keterangan" rows="2"
+                            placeholder="Tambahkan catatan atau keterangan tambahan (jika ada)..."
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-bpom-500 focus:bg-white transition duration-200 resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Drag and Drop File Upload Area -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Unggah File Data Dukung CAPA
+                    </label>
+                    <div id="dropZone" 
+                        class="border-2 border-dashed border-bpom-500/40 bg-bpom-50/30 hover:bg-bpom-50/70 hover:border-bpom-600 rounded-2xl p-6 text-center cursor-pointer transition duration-200 group">
+                        <input type="file" id="fileInput" class="hidden" multiple onchange="handleFileSelect(event)">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="w-14 h-14 rounded-full bg-bpom-100 text-bpom-600 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition duration-200 shadow-sm">
+                                <i class="ph-bold ph-cloud-arrow-up"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-700">
+                                <span class="text-bpom-600 font-bold underline decoration-2 underline-offset-2">Klik untuk mengunggah</span> atau seret file ke sini
+                            </p>
+                            <p class="text-xs text-slate-500 mt-1">Format: PDF, PNG, JPG, atau DOCX (Maksimal 10MB per file)</p>
+                        </div>
+                    </div>
+                    <!-- Selected Files List Container -->
+                    <div id="fileListContainer" class="mt-3 space-y-2 hidden"></div>
+                </div>
+            </div>
+
+            <!-- Form Actions Buttons -->
+            <div class="pt-6 flex flex-col sm:flex-row items-center gap-4">
+                <button type="button" onclick="resetForm()" 
+                    class="w-full sm:w-auto px-6 py-4 rounded-2xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-sm transition duration-200 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Form
+                </button>
+                
+                <button type="submit" 
+                    class="w-full sm:flex-1 py-4 px-8 rounded-2xl bpom-gradient-btn text-white font-bold text-sm shadow-xl shadow-bpom-900/20 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-paper-plane-tilt text-lg"></i> Submit Data Dukung CAPA
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center text-xs text-white/80 mt-6 space-y-1">
+            <p class="font-bold">Layanan Digital Badan Pengawas Obat dan Makanan (BPOM) di Surakarta</p>
+            <p class="opacity-80">&copy; 2026 BPOM Surakarta. Seluruh Hak Cipta Dilindungi Undang-Undang.</p>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-bpom-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center transform scale-95 transition-transform duration-300 border border-slate-100">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mx-auto mb-4 shadow-sm">
+                <i class="ph-bold ph-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-bpom-900">Data CAPA Berhasil Dikirim!</h3>
+            <p class="text-slate-600 text-sm mt-2">Terima kasih. Formulir Data Dukung CAPA Anda telah berhasil terverifikasi dan disimpan di database BPOM Surakarta.</p>
+            <div class="mt-6">
+                <button onclick="closeModal()" class="w-full py-3.5 bpom-gradient-btn text-white font-bold rounded-2xl text-sm transition shadow-lg">
+                    Selesai & Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logics -->
+    <script>
+        // Set default date to empty as requested
+        document.getElementById('tanggalPemeriksaan').value = '';
+
+        // 1. Live Timestamp Updating Logic (Format: YYYY-MM-DD HH:MM:SS)
+        function updateTimestamp() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+            const formattedTime = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const fullStamp = `${formattedDate} - ${formattedTime} WIB`;
+            document.getElementById('live-timestamp-display').textContent = fullStamp;
+            
+            const isoString = now.toISOString();
+            const cleanTimestamp = isoString.replace('T', ' ').substring(0, 19);
+            document.getElementById('timestamp').value = cleanTimestamp;
+        }
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+
+        // 2. Drag & Drop File Upload Logic
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileListContainer = document.getElementById('fileListContainer');
+        let selectedFiles = [];
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-bpom-600', 'bg-bpom-100/50');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-bpom-600', 'bg-bpom-100/50');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = Array.from(e.dataTransfer.files);
+            addFiles(files);
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            selectedFiles = [...selectedFiles, ...files];
+            renderFileList();
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        function renderFileList() {
+            if (selectedFiles.length === 0) {
+                fileListContainer.classList.add('hidden');
+                fileListContainer.innerHTML = '';
+                return;
+            }
+
+            fileListContainer.classList.remove('hidden');
+            fileListContainer.innerHTML = selectedFiles.map((file, index) => `
+                <div class="flex items-center justify-between bg-bpom-50/70 border border-bpom-100 rounded-xl px-3.5 py-2.5 text-xs">
+                    <div class="flex items-center gap-2 truncate pr-2">
+                        <i class="ph-bold ph-file-pdf text-bpom-600 text-xl"></i>
+                        <span class="font-bold text-slate-800 truncate">${file.name}</span>
+                        <span class="text-slate-500 font-medium">(${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
+                    </div>
+                    <button type="button" onclick="removeFile(${index})" class="text-slate-400 hover:text-rose-600 text-lg transition">
+                        <i class="ph-bold ph-x-circle"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Helper untuk mengubah File menjadi Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const base64Data = reader.result.split(',')[1];
+                    resolve({
+                        name: file.name,
+                        mimeType: file.type || 'application/octet-stream',
+                        data: base64Data
+                    });
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // 3. Form Submit Handler & Validation dengan integrasi Google Drive & Sheets
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengunggah & Mengirim...`;
+            submitBtn.disabled = true;
+
+            try {
+                // Konversi semua file terpilih menjadi array objek Base64
+                const filesPayload = await Promise.all(
+                    selectedFiles.map(file => fileToBase64(file))
+                );
+
+                // Kumpulkan data form
+                const formData = {
+                    timestamp: document.getElementById('timestamp').value,
+                    nama: document.getElementById('nama').value,
+                    namaPerusahaan: document.getElementById('namaPerusahaan').value,
+                    alamatPerusahaan: document.getElementById('alamatPerusahaan').value,
+                    tanggalPemeriksaan: document.getElementById('tanggalPemeriksaan').value,
+                    noTelp: document.getElementById('noTelp').value,
+                    email: document.getElementById('email').value,
+                    files: filesPayload, 
+                    keterangan: document.getElementById('keterangan').value 
+                };
+
+                // URL Endpoint Web App Google Apps Script Anda
+                const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxF5T2XJGC3dvJ8g40f0dsZO-4UheMkZDBq7b66BDMIKqFLt8_WJlUNihr3vJPINZ5D/exec';
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+
+                    // Show Success Modal
+                    const modal = document.getElementById('successModal');
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        modal.querySelector('div').classList.remove('scale-95');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
+                } else {
+                    throw new Error(result.message || 'Terjadi kesalahan pada server.');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal mengirim data: ' + error.message);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('successModal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                resetForm();
+            }, 300);
+        }
+
+        function resetForm() {
+            document.getElementById('inspectionForm').reset();
+            document.getElementById('tanggalPemeriksaan').value = '';
+            document.getElementById('keterangan').value = '';
+            selectedFiles = [];
+            renderFileList();
+        }
+    </script>
+</body>
+</html>
