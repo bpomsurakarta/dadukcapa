@@ -245,7 +245,7 @@
                             <p class="text-sm font-semibold text-slate-700">
                                 <span class="text-bpom-600 font-bold underline decoration-2 underline-offset-2">Klik untuk mengunggah</span> atau seret file ke sini
                             </p>
-                            <p class="text-xs text-slate-500 mt-1">Format: PDF, PNG, JPG, DOCX, XLSX, ZIP, RAR (Maksimal 10 MB/file & Total maks 50 MB)</p>
+                            <p class="text-xs text-slate-500 mt-1">Format: PDF, PNG, JPG, DOCX, XLSX, ZIP, RAR (Maksimal 10 MB/file & Total maks 25 MB)</p>
                         </div>
                     </div>
                     <!-- Selected Files List Container -->
@@ -260,9 +260,15 @@
                     <i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Form
                 </button>
                 
-                <button type="submit" 
+                <button type="submit" id="submitBtn"
                     class="w-full sm:flex-1 py-4 px-8 rounded-2xl bpom-gradient-btn text-white font-bold text-sm shadow-xl shadow-bpom-900/20 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
                     <i class="ph-bold ph-paper-plane-tilt text-lg"></i> Submit Data Dukung CAPA
+                </button>
+
+                <!-- Tombol Batal / Cancel Submit (Hidden Secara Default) -->
+                <button type="button" id="cancelSubmitBtn" onclick="cancelSubmission()"
+                    class="w-full sm:w-auto hidden px-6 py-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition duration-200 flex items-center justify-center gap-2 shadow-lg">
+                    <i class="ph-bold ph-x-circle text-lg"></i> Batal Kirim
                 </button>
             </div>
         </form>
@@ -310,6 +316,9 @@
         // Set default date to empty as requested
         document.getElementById('tanggalPemeriksaan').value = '';
 
+        // Global Controller untuk AbortController (Fitur Batal Kirim)
+        let currentAbortController = null;
+
         // 1. Live Timestamp Updating Logic (Format: YYYY-MM-DD HH:MM:SS)
         function updateTimestamp() {
             const now = new Date();
@@ -341,7 +350,7 @@
         let selectedFiles = [];
 
         const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
-        const MAX_TOTAL_SIZE = 50 * 1024 * 1024; // 50 MB total kumulatif
+        const MAX_TOTAL_SIZE = 25 * 1024 * 1024; // Diubah menjadi 25 MB total kumulatif
         const ALLOWED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.docx', '.xlsx', '.zip', '.rar'];
 
         dropZone.addEventListener('click', () => fileInput.click());
@@ -368,10 +377,9 @@
         function handleFileSelect(e) {
             const files = Array.from(e.target.files);
             addFiles(files);
-            fileInput.value = ''; // Reset input agar bisa pilih file yang sama kembali jika diperlukan
+            fileInput.value = ''; 
         }
 
-        // Fungsi untuk memunculkan modal kustom yang elegan
         function showCustomAlert(title, message) {
             document.getElementById('warningModalTitle').textContent = title;
             document.getElementById('warningModalMessage').textContent = message;
@@ -401,7 +409,6 @@
             let currentTotalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
 
             for (let file of files) {
-                // Cek ekstensi / format file yang diizinkan
                 const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
                 if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
                     showCustomAlert(
@@ -411,7 +418,6 @@
                     continue;
                 }
 
-                // Cek ukuran per file maksimal 10 MB
                 if (file.size > MAX_FILE_SIZE) {
                     const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
                     showCustomAlert(
@@ -421,11 +427,10 @@
                     continue;
                 }
 
-                // Cek akumulasi total ukuran file maksimal 50 MB
                 if ((currentTotalSize + file.size) > MAX_TOTAL_SIZE) {
                     showCustomAlert(
                         "Batas Total Terlampaui", 
-                        `Batas total ukuran file keseluruhan (maksimal 50 MB) telah terlampaui. File "${file.name}" tidak dapat ditambahkan.`
+                        `Batas total ukuran file keseluruhan (maksimal 25 MB) telah terlampaui. File "${file.name}" tidak dapat ditambahkan.`
                     );
                     break;
                 }
@@ -466,17 +471,15 @@
                 </div>
             `).join('');
 
-            // Tampilkan total ukuran file di bawah daftar
             htmlContent += `
                 <div class="text-right text-[11px] font-bold text-slate-500 pt-1">
-                    Total Ukuran: <span class="text-bpom-700">${(totalCurrentSize / (1024 * 1024)).toFixed(2)} MB</span> / 50.00 MB
+                    Total Ukuran: <span class="text-bpom-700">${(totalCurrentSize / (1024 * 1024)).toFixed(2)} MB</span> / 25.00 MB
                 </div>
             `;
 
             fileListContainer.innerHTML = htmlContent;
         }
 
-        // Helper untuk mengubah File menjadi Base64
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -493,11 +496,10 @@
             });
         }
 
-        // 3. Form Submit Handler & Validation dengan integrasi Google Drive & Sheets
+        // 3. Form Submit Handler & Validation dengan Tombol Batal
         async function handleFormSubmit(e) {
             e.preventDefault();
 
-            // Validasi Wajib Unggah File
             if (selectedFiles.length === 0) {
                 showCustomAlert(
                     "File Pendukung Kosong",
@@ -506,18 +508,23 @@
                 return;
             }
 
-            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('submitBtn');
+            const cancelBtn = document.getElementById('cancelSubmitBtn');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengunggah & Mengirim...`;
+
+            // Ubah UI tombol menjadi status loading dan tampilkan tombol Batal Kirim
+            submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengirim Data...`;
             submitBtn.disabled = true;
+            cancelBtn.classList.remove('hidden'); // Munculkan tombol batal
+
+            // Inisialisasi AbortController untuk membatalkan fetch
+            currentAbortController = new AbortController();
 
             try {
-                // Konversi semua file terpilih menjadi array objek Base64
                 const filesPayload = await Promise.all(
                     selectedFiles.map(file => fileToBase64(file))
                 );
 
-                // Kumpulkan data form
                 const formData = {
                     timestamp: document.getElementById('timestamp').value,
                     nama: document.getElementById('nama').value,
@@ -530,7 +537,6 @@
                     keterangan: document.getElementById('keterangan').value 
                 };
 
-                // URL Endpoint Web App Google Apps Script Anda
                 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzByfftdMoPwaqhH3W8ziWmQESA4bvVyOnScRAlHO0AusrkiFrByw7lVBMLrcpO4XhH/exec';
 
                 const response = await fetch(WEB_APP_URL, {
@@ -538,16 +544,13 @@
                     headers: {
                         'Content-Type': 'text/plain;charset=utf-8',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    signal: currentAbortController.signal // Hubungkan dengan controller pembatalan
                 });
 
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-
-                    // Show Success Modal
                     const modal = document.getElementById('successModal');
                     modal.classList.remove('hidden');
                     setTimeout(() => {
@@ -560,11 +563,33 @@
                 }
 
             } catch (error) {
-                console.error('Error:', error);
-                alert('Gagal mengirim data: ' + error.message);
-                submitBtn.innerHTML, submitBtn.innerHTML = originalText;
+                if (error.name === 'AbortError') {
+                    console.log('Pengiriman data dibatalkan oleh pengguna.');
+                } else {
+                    console.error('Error:', error);
+                    alert('Gagal mengirim data: ' + error.message);
+                }
+            } finally {
+                // Kembalikan tombol ke kondisi semula
+                submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
+                cancelBtn.classList.add('hidden');
+                currentAbortController = null;
             }
+        }
+
+        // Fungsi untuk membatalkan proses submit
+        function cancelSubmission() {
+            if (currentAbortController) {
+                currentAbortController.abort(); // Batalkan request fetch yang sedang berjalan
+            }
+            const submitBtn = document.getElementById('submitBtn');
+            const cancelBtn = document.getElementById('cancelSubmitBtn');
+            
+            submitBtn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt text-lg"></i> Submit Data Dukung CAPA`;
+            submitBtn.disabled = false;
+            cancelBtn.classList.add('hidden');
+            currentAbortController = null;
         }
 
         function closeModal() {
